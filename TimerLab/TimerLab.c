@@ -27,7 +27,7 @@ ISR(TIMER0_OVF_vect)
 				value -= 1;
 				break;
 		}
-		if (value == 0) mode ^= 1;
+		if (value == 0 || value == 255) mode ^= 1;
 		OCR0A = value;
 		OCR0B = value;
 		prescaler = 0;
