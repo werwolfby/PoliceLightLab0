@@ -7,7 +7,32 @@
 
 
 #include <avr/io.h>
-#include <util/delay.h>
+#include <avr/interrupt.h>
+
+uint8_t mode = 0;
+uint8_t value = 0;
+uint8_t prescaler = 0;
+	
+ISR(TIMER0_OVF_vect)
+{
+	prescaler++;
+	if (prescaler == 5)
+	{
+		switch (mode)
+		{
+			case 0:
+				value += 1;
+				break;
+			case 1:
+				value -= 1;
+				break;
+		}
+		if (value == 0) mode ^= 1;
+		OCR0A = value;
+		OCR0B = value;
+		prescaler = 0;
+	}
+}
 
 #define FAST_PWM (_BV(WGM01) | _BV(WGM00))
 #define COM0A_SET (_BV(COM0A0) | _BV(COM0A1))
@@ -26,24 +51,11 @@ int main(void)
 	TCCR0A |= FAST_PWM | COM0A_SET | COM0B_CLEAR;
 	TCCR0B |= PRESCALE_1;
 	
-	uint8_t mode = 0;
-	uint8_t value = 0;
+	TIMSK |= _BV(TOIE0);
+	
+	sei();
 	
     while(1)
     {
-		switch (mode)
-		{
-			case 0:
-				value += 1;
-				break;
-			case 1:
-				value -= 1;
-				break;
-		}
-		if (value == 255 || value == 0)
-			mode ^= 1;
-		OCR0A = value;
-		OCR0B = value;
-		_delay_ms(10);
     }
 }
