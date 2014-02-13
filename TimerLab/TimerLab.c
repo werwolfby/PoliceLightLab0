@@ -27,23 +27,23 @@ int main(void)
 	TCCR0B |= PRESCALE_1;
 	
 	uint8_t mode = 0;
-	uint8_t value = 12;
+	uint8_t value = 0;
 	
     while(1)
     {
 		switch (mode)
 		{
 			case 0:
-				value += 10;
+				value += 1;
 				break;
 			case 1:
-				value -= 10;
+				value -= 1;
 				break;
 		}
-		if (value > 250 || value < 10)
+		if (value == 255 || value == 0)
 			mode ^= 1;
 		OCR0A = value;
 		OCR0B = value;
-		_delay_ms(20);
+		_delay_ms(10);
     }
 }
