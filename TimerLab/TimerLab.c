@@ -26,13 +26,24 @@ int main(void)
 	TCCR0A |= FAST_PWM | COM0A_SET | COM0B_CLEAR;
 	TCCR0B |= PRESCALE_1;
 	
-	OCR0A = 10;
-	OCR0B = 10;
+	uint8_t mode = 0;
+	uint8_t value = 12;
 	
     while(1)
     {
-		OCR0A += 10;
-		OCR0B += 10;
+		switch (mode)
+		{
+			case 0:
+				value += 10;
+				break;
+			case 1:
+				value -= 10;
+				break;
+		}
+		if (value > 250 || value < 10)
+			mode ^= 1;
+		OCR0A = value;
+		OCR0B = value;
 		_delay_ms(20);
     }
 }
