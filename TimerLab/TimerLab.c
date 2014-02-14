@@ -8,9 +8,17 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 
+#define C1 15288
+#define C1d 14431
+#define D1 13621
+#define D1d 12856
 #define E1 12134
+#define F1 11453
+#define F1d 10811
 #define G1 10204
+#define G1d 9631
 #define A1 9090
 #define A1d 8580
 #define H1 8099
@@ -21,22 +29,54 @@
 #define E2 6069
 #define F2 5730
 #define G2 5102
-#define A2 4545
 #define G2d 4815
+#define A2 4545
 #define A2d 4291
+#define H2 4049
 #define C3 3822
 #define P 0
 #define End 1
+#define N16 250.000
+#define N8 500.000
+#define N4 1000.000
+#define N2 2000.000
+#define N1 4000.000
 
-int tanki[31]={C2,D2,D2d,C2,D2,D2d,D2d,F2,G2,D2d,F2,G2,F2,G2,A2,F2,G2,A2,G2d,A2d,C3,G2d,A2d,C3,C3,P,C3,C3,C3,C3,End}; //мелодия танчиков
+uint16_t const tanki[] PROGMEM ={160.000,P,N16,C2,N16,D2,N16,D2d,N16,C2,N16,D2,N16,D2d,N16,D2d,N16,F2,N16,G2,N16,D2d,N16,F2,N16,G2,N16,
+F2,N16,G2,N16,A2,N16,F2,N16,G2,N16,A2,N16,G2d,N16,A2d,N16,C3,N16,G2d,N16,A2d,N16,C3,N16,C3,N16,P,N16,C3,N16,C3,N16,C3,N16,C3,N16,End}; //мелодия танчиков
 
-int mario[45]= {E2,E2,P,E2,P,C2,E2,P,
-	G2,P,P,G1,P,P,
-	C2,P,P,G1,P,P,E1,P,
-	P,A1,P,H1,P,A1d,A1,P,
-	G1,E2,G2,A2,P,F2,G2,
-	P,E2,P,C2,D2,H1,End};  //мелодия марио
+uint16_t const mario[] PROGMEM = {100.000,P,N8,E2,N16,E2,N16,P,N16,E2,N8,P,N16,C2,N16,E2,N16,P,N16,
+	G2,N16,P,N16,P,N8,G1,N16,P,N8,P,N8,
+	C2,N16,P,N8,G1,N16,P,N8,E1,N8,P,N8,
+	P,N16,A1,N16,P,N16,H1,N16,P,N16,A1d,N16,A1,N16,P,N16,
+	G1,N16,E2,N16,G2,N16,A2,N16,P,N16,F2,N16,G2,N16,
+P,N16,E2,N16,P,N16,C2,N16,D2,N16,H1,N16,End};   //мелодия марио
 
+uint16_t const miniPolka[] PROGMEM ={120.000,P,N8,C2,N8,E2,N8,G2,N8,E2,N8,G2,N8,F2,N8,D2,N4,G2,N8,F2,N8,D2,N4,G2,N8,E2,N8,C2,N4,
+C2,N8,E2,N8,G2,N8,E2,N8,A2,N8,G2,N8,F2,N4,G2,N8,F2,N8,E2,N8,D2,N8,C2,N4,End};
+uint16_t const bumer[] PROGMEM ={170.000,P,N8,E2,N8,G2,N4,P,N4,P,N4,
+	G2,N8,E2,N4,P,N4,P,N4,
+	A2,N8,G2,N8,A2,N8,G2,
+N8,A2,N8,G2,N8,A2,N8,G2,N8,A2,N8,H2,N4,P,N4,End};
+uint16_t const nokia[] PROGMEM ={120.000,P,N8,E2,N8,D2,N8,
+	F1d,N4,G1d,N4,C2d,N8,H1,N8,
+	D1,N4,E1,N4,H1,N8,A1,N8,
+C1d,N4,E1,N4,A1,N4,End};
+uint16_t const mortal[] PROGMEM ={140.000,A1,N8,A1,N8,C2,N8,A1,N8,D2,N8,A1,N8,E2,N8,D2,N8,
+	C2,N8,C2,N8,E2,N8,C2,N8,G2,N8,C2,N8,E2,N8,C2,N8,
+	G1,N8,G1,N8,H1,N8,G1,N8,C2,N8,G1,N8,D2,N8,C2,N8,
+F1,N8,F1,N8,A1,N8,F1,N8,C2,N8,F1,N8,C2,N8,H1,N8,End};
+
+//int *playlist[]={mortal,
+	//nokia,
+	//miniPolka,
+	//bumer,
+	//mario,
+	//tanki
+//};
+//
+//int trackN=0;
+//
 
 #define FAST_PWM0 (_BV(WGM01) | _BV(WGM00))
 #define FAST_PWM1 (_BV(WGM11) | _BV(WGM10))
@@ -109,9 +149,12 @@ int main(void)
 	
 	uint8_t current = 0;
 	
+	#define SONG miniPolka
+	
     while(1)
     {
-		uint16_t value = mario[current];
+		uint16_t pause = pgm_read_word(SONG + current*2 + 0);
+		uint16_t value = pgm_read_word(SONG + current*2 + 1);
 		
 		if (value == End)
 		{
@@ -121,7 +164,8 @@ int main(void)
 		
 		OCR1A = value;
 		
-		_delay_ms(130);
+		for (int i = 0; i < pause; i++)
+			_delay_us(370);
 		
 		current++;
     }
