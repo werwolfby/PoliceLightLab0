@@ -9,6 +9,35 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#define E1 12134
+#define G1 10204
+#define A1 9090
+#define A1d 8580
+#define H1 8099
+#define C2 7648
+#define C2d 7220
+#define D2 6814
+#define D2d 6430
+#define E2 6069
+#define F2 5730
+#define G2 5102
+#define A2 4545
+#define G2d 4815
+#define A2d 4291
+#define C3 3822
+#define P 0
+#define End 1
+
+int tanki[31]={C2,D2,D2d,C2,D2,D2d,D2d,F2,G2,D2d,F2,G2,F2,G2,A2,F2,G2,A2,G2d,A2d,C3,G2d,A2d,C3,C3,P,C3,C3,C3,C3,End}; //мелодия танчиков
+
+int mario[45]= {E2,E2,P,E2,P,C2,E2,P,
+	G2,P,P,G1,P,P,
+	C2,P,P,G1,P,P,E1,P,
+	P,A1,P,H1,P,A1d,A1,P,
+	G1,E2,G2,A2,P,F2,G2,
+	P,E2,P,C2,D2,H1,End};  //мелодия марио
+
+
 #define FAST_PWM0 (_BV(WGM01) | _BV(WGM00))
 #define FAST_PWM1 (_BV(WGM11) | _BV(WGM10))
 #define CTCA 0
@@ -45,22 +74,24 @@ ISR(TIMER0_OVF_vect)
 			mode ^= 1;
 		}
 		uint16_t newValue = 400 + value * 2;
-		if (TCNT1 > newValue - 8)
-		{
-			TCNT1 = 0;
-		}
-		OCR1A = newValue;
-		//TCNT1 = 0;
+		//if (TCNT1 > newValue - 8)
+		//{
+			//TCNT1 = 0;
+		//}
+		//OCR1A = newValue;
+		////TCNT1 = 0;
 		OCR0A = value;
 		OCR0B = value;
 		prescaler = 0;
 	}
 }
 
+#include <util/delay.h>
+
 int main(void)
 {
-	DDRA |= 
-	
+	//DDRA |= 
+	//
 	DDRB |= _BV(DDB2) | _BV(DDB3);
 	DDRD |= _BV(DDD5);
 	
@@ -76,7 +107,22 @@ int main(void)
 	
 	sei();
 	
+	uint8_t current = 0;
+	
     while(1)
     {
+		uint16_t value = mario[current];
+		
+		if (value == End)
+		{
+			current = 0;
+			continue;				
+		}
+		
+		OCR1A = value;
+		
+		_delay_ms(130);
+		
+		current++;
     }
 }
