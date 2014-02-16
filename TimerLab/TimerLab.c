@@ -29,38 +29,26 @@
 
 uint8_t mode = 0;
 uint8_t value = 128;
-uint8_t prescaler = 0;
 	
 ISR(TIMER0_OVF_vect)
 {
-	//if (TIFR & _BV(TOV1)) return;
-	
-	prescaler++;
-	if (prescaler == 1)
+	if (mode == 0) value++;
+	else value--;
+	if (value == 0 || value == 255) 
 	{
-		if (mode == 0) value++;
-		else value--;
-		if (value == 0 || value == 255) 
-		{
-			mode ^= 1;
-		}
-		uint16_t newValue = 400 + value * 2;
-		if (TCNT1 > newValue - 8)
-		{
-			TCNT1 = 0;
-		}
-		OCR1A = newValue;
-		//TCNT1 = 0;
-		OCR0A = value;
-		OCR0B = value;
-		prescaler = 0;
+		mode ^= 1;
 	}
+	OCR0A = value;
+	OCR0B = value;
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+	OCR1A = 400 + value * 2;
 }
 
 int main(void)
 {
-	DDRA |= 
-	
 	DDRB |= _BV(DDB2) | _BV(DDB3);
 	DDRD |= _BV(DDD5);
 	
@@ -69,10 +57,12 @@ int main(void)
 	TCCR1A |= CTCA | COM1A_TOGGLE;
 	TCCR1B |= CTCB;
 	
-	TCCR0B |= PRESCALE_0_1;
+	TCCR0B |= PRESCALE_0_8;
 	TCCR1B |= PRESCALE_1_1;
 	
-	TIMSK |= _BV(TOIE0);
+	OCR1A = 400;
+	
+	TIMSK |= _BV(TOIE0) | _BV(OCIE1A);
 	
 	sei();
 	
